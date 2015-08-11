@@ -1,7 +1,7 @@
 Understanding the playbook and variables
 ==========
 
-The playbook that installs the whole cluster is [site.yml](site.yml). It does server things:
+The playbook that installs the whole cluster is [provision_liferay_cluster/site.yml](provision_liferay_cluster/site.yml). It does server things:
 
 
 Update all OS repos
@@ -25,7 +25,7 @@ Next the NFS server will be installed on the hosts defined in `nfs_server` inven
 	  - role: atsaki.nfs
 	    sudo: yes   
 
-This role allows to define some variables which is done in [all.yml](group_vars/all.yml) file:
+This role allows to define some variables which is done in [all.yml](provision_liferay_cluster/group_vars/all.yml) file:
 
 	nfs_server: "{{ groups.nfs_server[0] }}"
 
@@ -92,7 +92,7 @@ This is done by `milendyankov.liferay-db-mysql` ((see [here](https://github.com/
 
 Although the role allows for customizations, we use defaults which creates database named `liferay` accessed by user `liferay` with password `liferay`. 
 
-To create different/additional databases or user you can add the following to [all.yml](group_vars/all.yml) file:
+To create different/additional databases or user you can add the following to [all.yml](provision_liferay_cluster/group_vars/all.yml) file:
 
     mysql_databases:
      - {name: "lportal", encoding: "utf8", collation: "utf8_general_ci"}
@@ -126,8 +126,8 @@ The default configuration:
 	  roles:
 	    - role: milendyankov.liferay
 
-looks for Liferay bundle stored in a file named `liferay-portal-tomcat-6.2-ce-ga4.zip`. It then copies it and extracts it on the server. If your file name is different please update it in [all.yml](group_vars/all.yml) file. Alternatively you can provide a URL to download the file from. Furthermore you can configure Liferay to use different main database, add additional databases, set DL folder, ...
-Here is an example of configuration one can put in [all.yml](group_vars/all.yml) file
+looks for Liferay bundle stored in a file named `liferay-portal-tomcat-6.2-ce-ga4.zip`. It then copies it and extracts it on the server. If your file name is different please update it in [all.yml](provision_liferay_cluster/group_vars/all.yml) file. Alternatively you can provide a URL to download the file from. Furthermore you can configure Liferay to use different main database, add additional databases, set DL folder, ...
+Here is an example of configuration one can put in [all.yml](provision_liferay_cluster/group_vars/all.yml) file
 
       liferay_archive: 
         local: <PATH_TO_STORE_FILE>

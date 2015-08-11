@@ -40,7 +40,7 @@ You can provision the infrastructure from any machine that is able to connect to
   * make sure you have Ansible installed, can run playbooks and install roles from Galaxy/GitHub ! 
   * then go to `provision_liferay_cluster` folder. 
  
-The examples in this project use some publicly available roles from [Ansible Galaxy](http://galaxy.ansible.com/). Those are defined in [requirements.yml](requirements.yml) file. We need to install them:
+The examples in this project use some publicly available roles from [Ansible Galaxy](http://galaxy.ansible.com/). Those are defined in [provision_liferay_cluster/requirements.yml](provision_liferay_cluster/requirements.yml) file. We need to install them:
 
 ```
 ansible-galaxy install -r requirements.yml 
@@ -50,7 +50,7 @@ Depending on how you have installed and configured Ansible you may have to use `
 
 ### Describe your infrastructure
 
-If you are using the `fake_production` set up, there is nothing to do. The infrastructure is already defined in [fake_production.inventory](fake_production.inventory) file!  
+If you are using the `fake_production` set up, there is nothing to do. The infrastructure is already defined in [provision_liferay_cluster/fake_production.inventory](provision_liferay_cluster/fake_production.inventory) file!  
 
 The inventory file defines several inventory groups: 
 
@@ -65,7 +65,7 @@ Those groups are important as the playbook will use them to figure out where to 
 
 ### Provide or download Liferay bundle
 
-By default the `liferay` role is configured to look for file named `liferay-portal-tomcat-6.2-ce-ga4.zip` in the `files` folder. If you have downloaded it already, simply place it there. If your file name is different please update the variable in [all.yml](group_vars/all.yml) file:
+By default the `liferay` role is configured to look for file named `liferay-portal-tomcat-6.2-ce-ga4.zip` in the `files` folder. If you have downloaded it already, simply place it there. If your file name is different please update the variable in [provision_liferay_cluster/group_vars/all.yml](provision_liferay_cluster/group_vars/all.yml) file:
 
     liferay_archive: 
       local: files/<ANOTHER_FILE_NAME_HERE>.zip
