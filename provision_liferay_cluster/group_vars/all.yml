@@ -1,0 +1,31 @@
+nfs_server: "{{ groups.nfs_server[0] }}"
+
+nfs_exported_directories:
+  - path: /export/Liferay/misc
+    hosts:
+      - name: "{{ nfs_subnet }}"
+        options: ["rw", "sync", "fsid=0", "crossmnt", "no_subtree_check"]
+    mount_point: /mnt/shared/liferay/misc
+
+  - path: /export/Liferay/document_library
+    hosts:
+      - name: "{{ nfs_subnet }}"
+        options: ["rw", "sync", "fsid=0", "crossmnt", "no_subtree_check"]
+    mount_point: /mnt/shared/liferay/document_library
+
+
+liferay_archive: 
+  local: files/liferay-portal-tomcat-6.2-ce-ga4.zip
+#    url: "http://sourceforge.net/projects/lportal/files/Liferay%20Portal/6.2.3%20GA4/liferay-portal-tomcat-6.2-ce-ga4-20150416163831865.zip"
+
+
+liferay_default_database: 
+  driver: "com.mysql.jdbc.Driver"
+  url: "jdbc:mysql://{{ groups.mysql[0] }}/liferay?useUnicode=true&characterEncoding=UTF-8&useFastDateParsing=false"
+  user: "liferay"
+  pass: "liferay"
+
+
+liferay_dl_folder: "{{ nfs_exported_directories[1].mount_point }}"
+
+liferay_cluster_autodetect: "{{ groups.mysql[0] }}:3306"

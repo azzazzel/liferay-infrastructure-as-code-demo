@@ -1,0 +1,2 @@
+**/.vagrant
+provision_liferay_cluster/files/*.zip

@@ -1,0 +1,54 @@
+
+Vagrant.configure(2) do |config|
+
+$script = <<SCRIPT
+  echo "$1 $2" | tee -a /etc/hosts
+  hostnamectl set-hostname $2
+  ip route add 224.0.0.0/4 dev eth1
+SCRIPT
+
+  boxes = [
+      {
+          :name => "db",
+          :ip => "192.168.21.104",
+          :mem => "1024",
+          :cpu => "1"
+      },
+      {
+          :name => "app1",
+          :ip => "192.168.21.102",
+          :mem => "2048",
+          :cpu => "2"
+      },
+      {
+          :name => "app2",
+          :ip => "192.168.21.103",
+          :mem => "2048",
+          :cpu => "2"
+      },
+      {
+          :name => "web",
+          :ip => "192.168.21.101",
+          :mem => "1024",
+          :cpu => "1"
+      }      
+  ]
+
+  boxes.each do |b|
+
+    config.vm.define b[:name] do |srv|
+      srv.vm.box = "ubuntu/vivid64"
+      srv.vm.network "private_network", ip: b[:ip]
+
+      srv.vm.provision "shell", inline: $script, args: [b[:ip], b[:name]]
+
+      config.vm.provider "virtualbox" do |v|
+        v.memory = b[:mem]
+        v.cpus = b[:cpu]
+      end
+
+    end 
+
+  end
+
+end

@@ -1,0 +1,26 @@
+
+[nfs_server]
+192.168.21.104 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/db/virtualbox/private_key"
+
+[nfs_client]
+192.168.21.101 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/web/virtualbox/private_key"
+192.168.21.102 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/app1/virtualbox/private_key"
+192.168.21.103 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/app2/virtualbox/private_key"
+
+[mysql]
+192.168.21.104 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/db/virtualbox/private_key"
+
+[java]
+192.168.21.102 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/app1/virtualbox/private_key"
+192.168.21.103 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/app2/virtualbox/private_key"
+
+[liferay]
+192.168.21.102 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/app1/virtualbox/private_key"
+192.168.21.103 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/app2/virtualbox/private_key"
+
+[apache]
+192.168.21.101 ansible_ssh_private_key_file="../fake_production/.vagrant/machines/web/virtualbox/private_key"
+
+[all:vars]
+ansible_ssh_user=vagrant
+nfs_subnet=192.168.21.0/24

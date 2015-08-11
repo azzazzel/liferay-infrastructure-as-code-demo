@@ -1,0 +1,5 @@
+- src: ANXS.oracle-jdk
+- src: atsaki.nfs
+- src: milendyankov.liferay
+- src: milendyankov.liferay-balancer-apache
+- src: milendyankov.liferay-db-mysql

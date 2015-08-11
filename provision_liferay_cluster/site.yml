@@ -1,0 +1,90 @@
+---
+##
+## This playbook configures Lferay cluster that consists of
+## - NFS server
+## - DB server
+## - number of Liferay app servers
+## - number of web servers
+##
+
+#
+# Update repos
+#
+- hosts: all
+  tasks:
+  - apt: update_cache=yes
+    sudo: yes  
+
+#
+# Configure NFS server
+#
+- hosts: nfs_server
+  roles:
+  - role: atsaki.nfs
+    sudo: yes  
+
+
+#
+# Provision servers where NFS clients sohuld be installed
+#
+- hosts: nfs_client
+  tasks:
+  - name: Install NFS common
+    sudo: yes
+    apt: name={{ item }} state=installed update_cache=yes
+    with_items:
+     - nfs-common
+
+  - name: Make sure mount points exists
+    sudo: yes
+    file: path={{ item.mount_point }} state=directory mode=0777
+    with_items: nfs_exported_directories
+
+  - name: Update fstab files
+    sudo: yes
+    lineinfile: 
+     dest: /etc/fstab
+     line: "{{ nfs_server }}:/{{ item.path }}   {{ item.mount_point }}   nfs    auto  0  0"
+    with_items: nfs_exported_directories
+    notify: 
+     - mount nfs
+  handlers:
+  - name: mount nfs
+    sudo: yes
+    shell: mount {{ item.mount_point }}
+    with_items: nfs_exported_directories
+
+
+#
+# Provision servers where MySQL should be installed
+#
+- hosts: mysql
+  roles:
+  - role: milendyankov.liferay-db-mysql
+
+#
+# Provision servers where Java should be installed
+#
+- hosts: java
+  sudo: yes
+  roles:
+  - role: ANXS.oracle-jdk
+    oracle_jdk_java_versions: [7]
+    oracle_jdk_java_version_default: 7
+    
+
+#
+# Provision servers where Liferay should be installed
+#
+- hosts: liferay
+  roles:
+    - role: milendyankov.liferay
+  
+#
+# Provision servers where Apache HTTPD should be installed
+#
+- hosts: apache
+  roles:
+    - role: milendyankov.liferay-balancer-apache
+    
+    
