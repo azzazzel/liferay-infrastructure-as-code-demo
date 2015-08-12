@@ -83,7 +83,7 @@ You can configure this role to install any recent Liferay CE or EE version!
 While in `provision_liferay_cluster` folder run
 
 ```
-ansible-playbook site.ymel
+ansible-playbook site.yml
 ```
 
 It may take a long time to complete. Each server will download and install required software from appropriate software repositories independently. 
