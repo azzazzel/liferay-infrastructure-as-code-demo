@@ -61,7 +61,7 @@ Next we want to make sure NFS client is installed and shared folders are mounted
 ```yaml
 - hosts: nfs_client
   
-  tasks:inventory group.
+  tasks:
   - name: Install NFS common
     sudo: yes
     apt: name={{ item }} state=installed update_cache=yes
