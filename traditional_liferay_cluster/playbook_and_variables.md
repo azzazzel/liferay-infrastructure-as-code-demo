@@ -1,7 +1,7 @@
 Understanding the playbook and variables
 ==========
 
-The playbook that installs the whole cluster is [provision_liferay_cluster/site.yml](provision_liferay_cluster/site.yml). Here is what it does (step by step):
+The playbook that installs the whole cluster is [provision_with_ansible/site.yml](provision_with_ansible/site.yml). Here is what it does (step by step):
 
 
 Update all OS repos
@@ -25,7 +25,7 @@ Next the NFS server will be installed on the hosts defined in `nfs_server` inven
 	  - role: atsaki.nfs
 	    sudo: yes   
 
-This role allows configuration trough variables which is done in [all.yml](provision_liferay_cluster/group_vars/all.yml) file:
+This role allows configuration trough variables which is done in [all.yml](provision_with_ansible/group_vars/all.yml) file:
 
 	nfs_server: "{{ groups.nfs_server[0] }}"
 
@@ -90,7 +90,7 @@ Liferay can work with many different database servers. However for this demo we'
 
 which installs MySQL server and creates database named `liferay` accessed by user `liferay` with password `liferay`. 
 
-Creation of different/additional databases or users, is possible through providing some additional configuration in [all.yml](provision_liferay_cluster/group_vars/all.yml) file. Here is an example:
+Creation of different/additional databases or users, is possible through providing some additional configuration in [all.yml](provision_with_ansible/group_vars/all.yml) file. Here is an example:
 
     mysql_databases:
      - {name: "<YOUR_DB_NAME>", encoding: "utf8", collation: "utf8_general_ci"}
@@ -126,10 +126,10 @@ The default configuration:
 	  roles:
 	    - role: milendyankov.liferay
 
-looks for Liferay bundle stored in a file named `liferay-portal-tomcat-6.2-ce-ga4.zip`. It then copies it and extracts it on all servers in `liferay` inventory group. If you what to use a Liferay bundle with different file name (must be packed as ZIP) please update the name/location in [all.yml](provision_liferay_cluster/group_vars/all.yml) file. Alternatively you can provide a URL to download the file from (downloaded only if the local file does not exists). 
+looks for Liferay bundle stored in a file named `liferay-portal-tomcat-6.2-ce-ga4.zip`. It then copies it and extracts it on all servers in `liferay` inventory group. If you what to use a Liferay bundle with different file name (must be packed as ZIP) please update the name/location in [all.yml](provision_with_ansible/group_vars/all.yml) file. Alternatively you can provide a URL to download the file from (downloaded only if the local file does not exists). 
 
 Furthermore you can configure Liferay to use different main database, add additional databases, set DL folder, ...
-Here is an example of configuration that can be provided in [all.yml](provision_liferay_cluster/group_vars/all.yml) file
+Here is an example of configuration that can be provided in [all.yml](provision_with_ansible/group_vars/all.yml) file
 
       liferay_archive: 
         local: <PATH_TO_STORE_FILE>
