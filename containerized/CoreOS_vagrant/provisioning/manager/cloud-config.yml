@@ -1,0 +1,61 @@
+#cloud-config
+
+coreos:
+  etcd2:
+    name: __ETCD__SERVER_NAME__
+    initial-cluster:  __ETCD__INITIAL_CLUSTER__
+    initial-advertise-peer-urls: http://__ETCD__PUBLIC_IP__:2380
+    advertise-client-urls: http://__ETCD__PUBLIC_IP__:2379
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://0.0.0.0:2380,http://0.0.0.0:7001
+  fleet:
+    public-ip: $public_ipv4
+    metadata: "role=manager"
+  flannel:
+    interface: $public_ipv4
+  units:
+    - name: etcd2.service
+      command: start
+    - name: flanneld.service
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.1.0.0/16" }'
+      command: start
+    - name: fleet.service
+      command: start
+    - name: confd.service
+      command: start
+      content: |
+        [Unit]
+        Description=Start confd 
+        After=etcd2.service
+        Requires=etcd2.service
+
+        [Service]
+        ExecStartPre=/usr/bin/mkdir -p /opt/confd
+        ExecStartPre=/usr/bin/cp /install/confd/confd /opt/confd/
+        ExecStartPre=/usr/bin/chmod +x /opt/confd/confd
+        ExecStart=/opt/confd/confd -node=127.0.0.1:2379 -interval=15
+        Restart=always
+        RestartSec=10
+write-files:
+  - path: /etc/confd/conf.d/hosts.toml
+    permissions: '0644'
+    content: |
+      [template]
+      src = "hosts.tmpl"
+      dest = "/etc/hosts"
+      keys = [ "/mycluster/kube/api-server" ]
+      owner = "root"
+      mode = "0644"
+  - path: /etc/confd/templates/hosts.tmpl
+    permissions: '0644'
+    content: |
+      192.168.40.100 docker.private
+      {{or (getv "/mycluster/kube/api-server") "127.0.0.1"}} kube-api-server.local
+
+

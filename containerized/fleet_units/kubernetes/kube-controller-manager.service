@@ -1,0 +1,18 @@
+[Unit]
+Description=Kubernetes Controller Manager
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStartPre=/usr/bin/mkdir -p /opt/kubernetes
+ExecStartPre=/usr/bin/cp /install/kubernetes/kube-controller-manager /opt/kubernetes/
+ExecStartPre=/usr/bin/chmod +x /opt/kubernetes/kube-controller-manager
+ExecStart=/opt/kubernetes/kube-controller-manager \
+--master=127.0.0.1:8080 \
+--cloud-provider=vagrant \
+--logtostderr=true
+Restart=always
+RestartSec=10
+
+[X-Fleet]
+MachineOf=kube-apiserver.service
+MachineMetadata=role=manager

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: liferay-demo-62-2
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  clusterIP: 10.100.0.102
+  selector:
+    app: liferay
+    version: 6.2_GA4
+    env: demo
+    instance_id: "2"

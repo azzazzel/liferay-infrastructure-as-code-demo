@@ -1,0 +1,17 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStartPre=/usr/bin/mkdir -p /opt/kubernetes
+ExecStartPre=/usr/bin/cp /install/kubernetes/kube-scheduler /opt/kubernetes/
+ExecStartPre=/usr/bin/chmod +x /opt/kubernetes/kube-scheduler
+ExecStart=/opt/kubernetes/kube-scheduler \
+--master=127.0.0.1:8080 \
+--logtostderr=true
+Restart=always
+RestartSec=10
+
+[X-Fleet]
+MachineOf=kube-apiserver.service
+MachineMetadata=role=manager

@@ -1,0 +1,21 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=/usr/bin/mkdir -p /opt/kubernetes
+ExecStartPre=/usr/bin/cp /install/kubernetes/kubelet /opt/kubernetes/
+ExecStartPre=/usr/bin/chmod +x /opt/kubernetes/kubelet
+ExecStart=/opt/kubernetes/kubelet \
+--address=0.0.0.0 \
+--port=10250 \
+--api-servers=http://kube-api-server.local:8080 \
+--hostname-override=${COREOS_PUBLIC_IPV4} \
+--logtostderr=true
+Restart=always
+RestartSec=10
+
+[X-Fleet]
+Global=true
+MachineMetadata=role=worker

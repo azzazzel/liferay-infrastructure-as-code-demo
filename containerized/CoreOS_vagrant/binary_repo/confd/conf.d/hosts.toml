@@ -1,0 +1,6 @@
+[template]
+src = "hosts.tmpl"
+dest = "/etc/hosts"
+keys = [ "/mycluster/kube/api-server" ]
+owner = "root"
+mode = "0644"

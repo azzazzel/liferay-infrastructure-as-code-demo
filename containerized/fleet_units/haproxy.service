@@ -1,0 +1,21 @@
+[Unit]
+Description=HAProxy
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill haproxy
+ExecStartPre=-/usr/bin/docker rm haproxy
+ExecStart=/usr/bin/docker run \
+	--rm \
+	--name haproxy \
+	-v /etc/haproxy.cfg:/etc/haproxy.cfg:ro \
+	-v /opt/haproxy:/usr/local/bin/haproxy \
+	-p 80:80 \
+	-p 81:81 \
+	docker.private:5000/haproxy \
+	haproxy -f /etc/haproxy.cfg -db
+ExecStop=/usr/bin/docker stop haproxy
+Restart=always
+
+[X-Fleet]
+Global=true
+MachineMetadata=role=frontend

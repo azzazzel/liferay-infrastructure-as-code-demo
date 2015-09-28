@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: liferay-demo-1
+spec:
+  replicas: 1
+  selector:
+    app: liferay
+    version: 6.2_GA4
+    env: demo
+    instance_id: "1"
+  template:
+    metadata:
+      labels:
+        app: liferay
+        version: 6.2_GA4
+        env: demo
+        instance_id: "1"
+    spec:
+      containers:
+        - name: liferay
+          image: docker.private:5000/liferay-cloud:6.2ga4
+          command:
+            - /usr/bin/liferay 
+          env:
+            - name: LIFERAY_CLUSTER_NAME
+              value: "demo"
+          ports:
+            - hostPort: 8080
+              containerPort: 8080
+            - hostPort: 8009
+              containerPort: 8009
+            - hostPort: 7800
+              containerPort: 7800
+            - hostPort: 7801
+              containerPort: 7801
+          volumeMounts:
+            - name: document-library
+              mountPath: "/var/lib/liferay/data/document_library"
+            - name: cluster-config
+              mountPath: "/opt/liferay/cluster-config/"
+      volumes:
+        - name: document-library
+          hostPath:
+            path: /shared/liferay/demo/document_library
+        - name: cluster-config
+          hostPath:
+            path: /shared/liferay/demo/cluster-config
+#####
+# Alternativelly one can directly mount NFS volume
+#####
+#        - name: shared
+#          nfs:
+#            server: "192.168.40.100"
+#            path: "/export/liferay/demo"

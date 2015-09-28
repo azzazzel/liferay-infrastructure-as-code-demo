@@ -1,0 +1,119 @@
+#cloud-config
+
+coreos:
+  etcd2:
+    proxy: on 
+    listen-client-urls: http://0.0.0.0:2379
+    initial-cluster: __ETCD__INITIAL_CLUSTER__
+  fleet:
+    public-ip: $public_ipv4
+    metadata: "role=frontend"
+  flannel:
+    interface: $public_ipv4
+  units:
+    - name: etcd2.service
+      command: start
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.1.0.0/16" }'
+    - name: fleet.service
+      command: start
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        Service=docker.service
+        BindIPv6Only=both
+
+        [Install]
+        WantedBy=sockets.target
+    - name: docker.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Application Container Engine
+        Documentation=http://docs.docker.com
+        After=docker.socket early-docker.target network.target
+        Requires=docker.socket early-docker.target
+
+        [Service]
+        Environment=TMPDIR=/var/tmp
+        EnvironmentFile=/run/flannel_docker_opts.env
+        MountFlags=slave
+        LimitNOFILE=1048576
+        LimitNPROC=1048576
+        ExecStartPre=/bin/echo "Docker options -> $DOCKER_OPTS $DOCKER_OPT_BIP $DOCKER_OPT_MTU $DOCKER_OPT_IPMASQ"
+        ExecStart=/usr/lib/coreos/dockerd --daemon --insecure-registry docker.private:5000 --host=fd:// $DOCKER_OPTS $DOCKER_OPT_BIP $DOCKER_OPT_MTU $DOCKER_OPT_IPMASQ
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: confd.service
+      command: start
+      content: |
+        [Unit]
+        Description=Start confd 
+        After=etcd2.service
+        Requires=etcd2.service
+
+        [Service]
+        ExecStartPre=/usr/bin/mkdir -p /opt/confd
+        ExecStartPre=/usr/bin/cp /install/confd/confd /opt/confd/
+        ExecStartPre=/usr/bin/chmod +x /opt/confd/confd
+        ExecStart=/opt/confd/confd -node=127.0.0.1:2379 -interval=15
+        Restart=always
+        RestartSec=10
+    - name: rpc-statd.service
+      command: start
+      enable: true
+    - name: shared.mount
+      command: start
+      content: |
+        [Mount]
+        What=192.168.40.100:/export
+        Where=/shared
+        Type=nfs
+write-files:
+  - path: /etc/conf.d/nfs
+    permissions: '0644'
+    content: |
+      OPTS_RPC_MOUNTD=""
+  - path: /etc/confd/conf.d/hosts.toml
+    permissions: '0644'
+    content: |
+      [template]
+      src = "hosts.tmpl"
+      dest = "/etc/hosts"
+      keys = [ "/mycluster/kube/api-server" ]
+      owner = "root"
+      mode = "0644"
+  - path: /etc/confd/templates/hosts.tmpl
+    permissions: '0644'
+    content: |
+      192.168.40.100 docker.private
+      {{or (getv "/mycluster/kube/api-server") "127.0.0.1"}} kube-api-server.local
+  - path: /etc/confd/conf.d/haproxy.toml
+    permissions: '0644'
+    content: |
+      [template]
+      src = "haproxy.cfg.tmpl"
+      dest = "/etc/haproxy.cfg"
+      keys = [ "/mycluster/haproxy/config" ]
+      owner = "root"
+      mode = "0644"
+
+      reload_cmd = "/usr/bin/systemctl restart haproxy"
+  - path: /etc/confd/templates/haproxy.cfg.tmpl
+    permissions: '0644'
+    content: |
+      {{getv "/mycluster/haproxy/config"}}
+
+

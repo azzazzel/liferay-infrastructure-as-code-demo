@@ -1,0 +1,7 @@
+This folder must contain Kubernetes binaries: 
+- kube-apiserver  
+- kube-controller-manager  
+- kubectl  
+- kubelet  
+- kube-proxy 
+- kube-scheduler 

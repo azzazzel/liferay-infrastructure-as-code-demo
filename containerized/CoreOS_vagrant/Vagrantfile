@@ -1,0 +1,85 @@
+# -*- mode: ruby -*-
+# # vi: set ft=ruby :
+
+require 'fileutils'
+require File.join(File.dirname(__FILE__), "utils.rb")
+
+Vagrant.require_version ">= 1.6.0"
+
+# read variable values from configuration file
+CONFIG = File.join(File.dirname(__FILE__), "config.rb")
+if File.exist?(CONFIG)
+  require CONFIG
+end
+
+Vagrant.configure("2") do |config|
+
+  # always use Vagrants insecure key
+  config.ssh.insert_key = false
+
+  # Configure CoreOS image to use
+  configureCoreOS(config, $update_channel, $image_version)
+
+  # Take care of conflicting/missing plugins and/or additions
+  fixPluginsAndAdditions (config)
+
+  # prepare list of managers to create and calculate the intitial cluster string 
+  managers, etcd_cluster = getManagers()
+
+  # prepare list of workers to create 
+  workers = getWorkers()
+
+  # prepare list of frontends to create 
+  frontends = getFrontends()
+
+  # print collected/computed data
+  puts "--------------------------------------------------"
+  puts "\n===> Managers:"
+  puts managers
+  puts "\n===> ETCD cluster string:"
+  puts etcd_cluster
+  puts "\n===> Workers:"
+  puts workers
+  puts "\n===> Frontends:"
+  puts frontends
+  puts "--------------------------------------------------"
+  
+  # Create outsider (nfs, mysql, ... anything outside the CoreOS cluster)
+  config.vm.define 'outsider' do |srv|
+    srv.vm.box = "ubuntu/vivid64"
+    srv.vm.network :private_network, ip: '192.168.40.100', netmask: '255.255.0.0'
+    srv.vm.synced_folder "binary_repo", "/install"
+    srv.vm.provision "shell", path: "provisioning/outsider/.provision.sh"
+    srv.vm.provider :virtualbox do |vb|
+      vb.memory = 1024
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
+    end
+  end
+
+  # Create manager instances
+  managers.each do |manager|
+    config.vm.define manager[:name] do |machine|
+      prepareMachine(machine, manager)
+      provisionAs("manager", machine, manager, etcd_cluster)
+    end
+  end
+
+  # Create worker instances
+  workers.each do |worker|
+    config.vm.define worker[:name] do |machine|
+      prepareMachine(machine, worker)
+      provisionAs("worker", machine, worker, etcd_cluster)
+    end
+  end
+
+  # Create frontend instances
+  frontends.each do |frontend|
+    config.vm.define frontend[:name] do |machine|
+      prepareMachine(machine, frontend)
+      provisionAs("frontend", machine, frontend, etcd_cluster)
+    end
+  end
+
+end

@@ -1,0 +1,8 @@
+[template]
+src = "haproxy.cfg.tmpl"
+dest = "/etc/haproxy.cfg"
+keys = [ "/mycluster/haproxy/config" ]
+owner = "root"
+mode = "0644"
+
+reload_cmd = "/usr/bin/systemctl restart haproxy"
