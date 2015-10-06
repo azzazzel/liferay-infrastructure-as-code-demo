@@ -1,4 +1,4 @@
-etcdctl set /mycluster/haproxy/config << EOF
+etcdctl set /demo/haproxy-config << EOF
 
 global
   maxconn 256
@@ -25,14 +25,14 @@ frontend http-in
 backend liferay
   balance roundrobin
   cookie SERVERID insert indirect nocache
-  server liferay1 10.100.0.101 maxconn 32 cookie s1
-  server liferay2 10.100.0.102 maxconn 32 cookie s2
+  server liferay1 10.151.0.101 maxconn 32 cookie s1
+  server liferay2 10.151.0.102 maxconn 32 cookie s2
 
 backend liferay1
-  server liferay1 10.100.0.101 maxconn 32
+  server liferay1 10.151.0.101 maxconn 32
 
 backend liferay2
-  server liferay2 10.100.0.102 maxconn 32
+  server liferay2 10.151.0.102 maxconn 32
 
 listen stats :81
     mode http

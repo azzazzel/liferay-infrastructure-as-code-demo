@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: liferay-demo-62-1
+  name: liferay-demo-service-1
 spec:
   ports:
     - name: http
       port: 80
       targetPort: 8080
-  clusterIP: 10.100.0.101
+  clusterIP: 10.151.0.101
   selector:
     app: liferay
     version: 6.2_GA4

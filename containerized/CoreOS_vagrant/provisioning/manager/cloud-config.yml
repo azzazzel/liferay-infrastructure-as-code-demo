@@ -23,7 +23,7 @@ coreos:
         - name: 50-network-config.conf
           content: |
             [Service]
-            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.1.0.0/16" }'
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.121.1.0/24" }'
       command: start
     - name: fleet.service
       command: start
@@ -39,6 +39,9 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /opt/confd
         ExecStartPre=/usr/bin/cp /install/confd/confd /opt/confd/
         ExecStartPre=/usr/bin/chmod +x /opt/confd/confd
+        # some default values do that confd does not break because of missing keys
+        ExecStartPre=/usr/bin/etcdctl set /demo/docker-regisry '192.168.40.100'
+        ExecStartPre=/usr/bin/etcdctl set /demo/k8s-api-server '127.0.0.1'        
         ExecStart=/opt/confd/confd -node=127.0.0.1:2379 -interval=15
         Restart=always
         RestartSec=10
@@ -49,13 +52,13 @@ write-files:
       [template]
       src = "hosts.tmpl"
       dest = "/etc/hosts"
-      keys = [ "/mycluster/kube/api-server" ]
+      keys = [ "/demo/k8s-api-server", "/demo/docker-regisry" ]
       owner = "root"
       mode = "0644"
   - path: /etc/confd/templates/hosts.tmpl
     permissions: '0644'
     content: |
-      192.168.40.100 docker.private
-      {{or (getv "/mycluster/kube/api-server") "127.0.0.1"}} kube-api-server.local
+      {{or (getv "/demo/docker-regisry") "192.168.40.100"}} docker.private
+      {{or (getv "/demo/k8s-api-server") "127.0.0.1"}} kube-api-server.local
 
 
